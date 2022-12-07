@@ -94,14 +94,25 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 		log.Print("Netbird engine started, my IP is: ", peerConfig.Address)
 
 		allowedIps := []string{"100.64.0.2/32"}
+		stun := mgmProto.HostConfig{Uri: "stun:netbird.extremecloudztna.com:3478", Protocol: 0}
+		turn := mgmProto.ProtectedHostConfig{User: "self", Password: "d9zRngJwvpQ1SFIjKRMIYYenLXAzilYjkj41aeDu33s", HostConfig: &mgmProto.HostConfig{Uri: "turn:netbird.extremecloudztna.com:3478", Protocol: 0}}
+
 		peer := mgmProto.RemotePeerConfig{
-			WgPubKey:   "3aVSqPYzS6xxJ2eALUT92/l4paId00ICTSekjrr/Uj0=",
+			WgPubKey:   "s1zvmG7exxlZTh9NM+z+2oG4ehelVBGBB9P38IVLlQg=",
 			AllowedIps: allowedIps,
 		}
-		err = engine.addNewPeer(&peer)
 
+		err = engine.addNewPeer(&peer)
 		if err != nil {
-			log.Errorf("error while starting Netbird Connection Engine: %s", err)
+			log.Errorf("error while adding peer: %s", err)
+		}
+		err = engine.updateSTUNs([]*mgmProto.HostConfig{&stun})
+		if err != nil {
+			log.Errorf("error while adding stun: %s", err)
+		}
+		err = engine.updateTURNs([]*mgmProto.ProtectedHostConfig{&turn})
+		if err != nil {
+			log.Errorf("error while adding turn: %s", err)
 		}
 
 		<-engineCtx.Done()
