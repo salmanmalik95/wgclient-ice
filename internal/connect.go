@@ -76,7 +76,7 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 			}
 		}()
 
-		peerConfig := PeerConfig{Address: "100.64.0.2/32"}
+		peerConfig := mgmProto.PeerConfig{Address: "100.64.0.1/32"}
 
 		engineConfig, err := createEngineConfig(myPrivateKey, config, peerConfig)
 		if err != nil {
@@ -98,11 +98,14 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 		turn := mgmProto.ProtectedHostConfig{User: "self", Password: "d9zRngJwvpQ1SFIjKRMIYYenLXAzilYjkj41aeDu33s", HostConfig: &mgmProto.HostConfig{Uri: "turn:netbird.extremecloudztna.com:3478", Protocol: 0}}
 
 		peer := mgmProto.RemotePeerConfig{
-			WgPubKey:   "s1zvmG7exxlZTh9NM+z+2oG4ehelVBGBB9P38IVLlQg=",
+			WgPubKey:   "3aVSqPYzS6xxJ2eALUT92/l4paId00ICTSekjrr/Uj0=",
 			AllowedIps: allowedIps,
 		}
 
-		err = engine.addNewPeer(&peer)
+		err = engine.updateNetworkMap(&mgmProto.NetworkMap{
+			RemotePeers: []*mgmProto.RemotePeerConfig{&peer},
+			PeerConfig:  &peerConfig,
+		})
 		if err != nil {
 			log.Errorf("error while adding peer: %s", err)
 		}
@@ -138,7 +141,7 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 }
 
 // createEngineConfig converts configuration received from Management Service to EngineConfig
-func createEngineConfig(key wgtypes.Key, config *Config, peerConfig PeerConfig) (*EngineConfig, error) {
+func createEngineConfig(key wgtypes.Key, config *Config, peerConfig mgmProto.PeerConfig) (*EngineConfig, error) {
 
 	engineConf := &EngineConfig{
 		WgIfaceName:    config.WgIface,
