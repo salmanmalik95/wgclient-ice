@@ -419,6 +419,35 @@ func SignalOfferAnswer(offerAnswer peer.OfferAnswer, myKey wgtypes.Key, remoteKe
 	return nil
 }
 
+func (e *Engine) InitConf(update *mgmProto.SyncResponse) error {
+	e.syncMsgMux.Lock()
+	defer e.syncMsgMux.Unlock()
+
+	if update.GetWiretrusteeConfig() != nil {
+		err := e.updateTURNs(update.GetWiretrusteeConfig().GetTurns())
+		if err != nil {
+			return err
+		}
+
+		err = e.updateSTUNs(update.GetWiretrusteeConfig().GetStuns())
+		if err != nil {
+			return err
+		}
+
+		// todo update signal
+	}
+
+	if update.GetNetworkMap() != nil {
+		// only apply new changes and ignore old ones
+		err := e.updateNetworkMap(update.GetNetworkMap())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (e *Engine) handleSync(update *mgmProto.SyncResponse) error {
 	e.syncMsgMux.Lock()
 	defer e.syncMsgMux.Unlock()
@@ -825,7 +854,7 @@ func (e *Engine) receiveSignalEvents() {
 		if err != nil {
 			// happens if signal is unavailable for a long time.
 			// We want to cancel the operation of the whole client
-
+			log.Error(err)
 			e.cancel()
 			return
 		}

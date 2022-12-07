@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	mgmProto "github.com/netbirdio/netbird/management/proto"
 	"time"
 
 	nbStatus "ztnav2client/status"
@@ -75,7 +76,7 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 			}
 		}()
 
-		peerConfig := PeerConfig{Address: "100.64.0.1/32"}
+		peerConfig := PeerConfig{Address: "100.64.0.2/32"}
 
 		engineConfig, err := createEngineConfig(myPrivateKey, config, peerConfig)
 		if err != nil {
@@ -91,6 +92,17 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 		}
 
 		log.Print("Netbird engine started, my IP is: ", peerConfig.Address)
+
+		allowedIps := []string{"100.64.0.2/32"}
+		peer := mgmProto.RemotePeerConfig{
+			WgPubKey:   "3aVSqPYzS6xxJ2eALUT92/l4paId00ICTSekjrr/Uj0=",
+			AllowedIps: allowedIps,
+		}
+		err = engine.addNewPeer(&peer)
+
+		if err != nil {
+			log.Errorf("error while starting Netbird Connection Engine: %s", err)
+		}
 
 		<-engineCtx.Done()
 
