@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/proto";
+
+package daemon;
+
+service DaemonService {
+  // Login uses setup key to prepare configuration for the daemon.
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+  // WaitSSOLogin uses the userCode to validate the TokenInfo and
+  // waits for the user to continue with the login on a browser
+  rpc WaitSSOLogin(WaitSSOLoginRequest) returns (WaitSSOLoginResponse) {}
+
+  // Up starts engine work in the daemon.
+  rpc Up(UpRequest) returns (UpResponse) {}
+
+  // Status of the service.
+  rpc Status(StatusRequest) returns (StatusResponse) {}
+
+  // Down engine work in the daemon.
+  rpc Down(DownRequest) returns (DownResponse) {}
+
+  // GetConfig of the daemon.
+  rpc GetConfig(GetConfigRequest) returns (GetConfigResponse) {}
+};
+
+message LoginRequest {
+  // setupKey wiretrustee setup key.
+  string setupKey = 1;
+
+  // preSharedKey for wireguard setup.
+  string preSharedKey = 2;
+
+  // managementUrl to authenticate.
+  string managementUrl = 3;
+
+  // adminUrl to manage keys.
+  string adminURL = 4;
+
+}
+
+message LoginResponse {
+  bool   needsSSOLogin = 1;
+  string userCode = 2;
+  string verificationURI = 3;
+  string verificationURIComplete = 4;
+}
+
+message WaitSSOLoginRequest {
+  string userCode = 1;
+}
+
+message WaitSSOLoginResponse {}
+
+message UpRequest {}
+
+message UpResponse {}
+
+message StatusRequest{
+  bool getFullPeerStatus = 1;
+}
+
+message StatusResponse{
+  // status of the server.
+  string status = 1;
+  FullStatus fullStatus = 2;
+  // NetBird daemon version
+  string daemonVersion = 3;
+}
+
+message DownRequest {}
+
+message DownResponse {}
+
+message GetConfigRequest {}
+
+message GetConfigResponse {
+  // managementUrl settings value.
+  string managementUrl = 1;
+
+  // configFile settings value.
+  string configFile = 2;
+
+  // logFile settings value.
+  string logFile = 3;
+
+  // preSharedKey settings value.
+  string preSharedKey = 4;
+
+  // adminURL settings value.
+  string adminURL = 5;
+}
+
+// PeerState contains the latest state of a peer
+message PeerState {
+  string IP = 1;
+  string pubKey = 2;
+  string connStatus = 3;
+  google.protobuf.Timestamp connStatusUpdate = 4;
+  bool relayed = 5;
+  bool direct = 6;
+  string localIceCandidateType = 7;
+  string remoteIceCandidateType =8;
+  string fqdn = 9;
+}
+
+// LocalPeerState contains the latest state of the local peer
+message LocalPeerState {
+  string IP = 1;
+  string pubKey = 2;
+  bool  kernelInterface =3;
+  string fqdn = 4;
+}
+
+// SignalState contains the latest state of a signal connection
+message SignalState {
+  string URL = 1;
+  bool connected = 2;
+}
+
+// ManagementState contains the latest state of a management connection
+message ManagementState {
+  string URL = 1;
+  bool connected = 2;
+}
+// FullStatus contains the full state held by the Status instance
+message FullStatus {
+    ManagementState managementState = 1;
+    SignalState     signalState = 2;
+    LocalPeerState  localPeerState = 3;
+    repeated PeerState peers = 4;
+}
