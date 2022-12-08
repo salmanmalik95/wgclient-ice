@@ -24,7 +24,7 @@ type PeerConfig struct {
 }
 
 // RunClient with main logic.
-func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Status) error {
+func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Status, initConf *mgmProto.SyncResponse) error {
 	backOff := &backoff.ExponentialBackOff{
 		InitialInterval:     time.Second,
 		RandomizationFactor: 1,
@@ -64,7 +64,7 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 		statusRecorder.UpdateLocalPeerState(localPeerState)
 
 		// with the global Wiretrustee config in hand connect (just a connection, no stream yet) Signal
-		signalClient, err := connectToSignal(engineCtx, "http", "netbird.extremecloudztna.com:10000", myPrivateKey)
+		signalClient, err := connectToSignal(engineCtx, config.SignalService.Protocol, config.SignalService.Uri, myPrivateKey)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -76,9 +76,7 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 			}
 		}()
 
-		peerConfig := mgmProto.PeerConfig{Address: "100.64.0.1/32"}
-
-		engineConfig, err := createEngineConfig(myPrivateKey, config, peerConfig)
+		engineConfig, err := createEngineConfig(myPrivateKey, config, config.PeerConfig)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -91,31 +89,12 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 			return err
 		}
 
-		log.Print("Netbird engine started, my IP is: ", peerConfig.Address)
+		log.Print("Netbird engine started, my IP is: ", config.PeerConfig.Address)
 
-		allowedIps := []string{"100.64.0.2/32"}
-		stun := mgmProto.HostConfig{Uri: "stun:netbird.extremecloudztna.com:3478", Protocol: 0}
-		turn := mgmProto.ProtectedHostConfig{User: "self", Password: "d9zRngJwvpQ1SFIjKRMIYYenLXAzilYjkj41aeDu33s", HostConfig: &mgmProto.HostConfig{Uri: "turn:netbird.extremecloudztna.com:3478", Protocol: 0}}
-
-		peer := mgmProto.RemotePeerConfig{
-			WgPubKey:   "3aVSqPYzS6xxJ2eALUT92/l4paId00ICTSekjrr/Uj0=",
-			AllowedIps: allowedIps,
-		}
-
-		err = engine.updateNetworkMap(&mgmProto.NetworkMap{
-			RemotePeers: []*mgmProto.RemotePeerConfig{&peer},
-			PeerConfig:  &peerConfig,
-		})
+		err = engine.InitConf(initConf)
 		if err != nil {
-			log.Errorf("error while adding peer: %s", err)
-		}
-		err = engine.updateSTUNs([]*mgmProto.HostConfig{&stun})
-		if err != nil {
-			log.Errorf("error while adding stun: %s", err)
-		}
-		err = engine.updateTURNs([]*mgmProto.ProtectedHostConfig{&turn})
-		if err != nil {
-			log.Errorf("error while adding turn: %s", err)
+			log.Errorf("failed to initiate conf %v", err)
+			return err
 		}
 
 		<-engineCtx.Done()
@@ -144,12 +123,11 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 func createEngineConfig(key wgtypes.Key, config *Config, peerConfig mgmProto.PeerConfig) (*EngineConfig, error) {
 
 	engineConf := &EngineConfig{
-		WgIfaceName:    config.WgIface,
-		WgAddr:         peerConfig.Address,
-		WgPrivateKey:   key,
-		WgPort:         config.WgPort,
-		SSHKey:         []byte(config.SSHKey),
-		NATExternalIPs: config.NATExternalIPs,
+		WgIfaceName:  config.WgIface,
+		WgAddr:       peerConfig.Address,
+		WgPrivateKey: key,
+		WgPort:       config.WgPort,
+		SSHKey:       []byte(config.SSHKey),
 	}
 
 	if config.PreSharedKey != "" {

@@ -380,6 +380,7 @@ func (e *Engine) GetConnectedPeers() []string {
 }
 
 func signalCandidate(candidate ice.Candidate, myKey wgtypes.Key, remoteKey wgtypes.Key, s signal.Client) error {
+
 	err := s.Send(&sProto.Message{
 		Key:       myKey.PublicKey().String(),
 		RemoteKey: remoteKey.String(),
@@ -388,6 +389,9 @@ func signalCandidate(candidate ice.Candidate, myKey wgtypes.Key, remoteKey wgtyp
 			Payload: candidate.Marshal(),
 		},
 	})
+
+	log.Debugf("Sent Signal Candidate %v , myKey=%v, remoteKey=%v, signal=%v", candidate, myKey.PublicKey().String(), remoteKey.String(), s)
+
 	if err != nil {
 		return err
 	}
@@ -408,6 +412,9 @@ func SignalOfferAnswer(offerAnswer peer.OfferAnswer, myKey wgtypes.Key, remoteKe
 		UFrag: offerAnswer.IceCredentials.UFrag,
 		Pwd:   offerAnswer.IceCredentials.Pwd,
 	}, t)
+
+	log.Debugf("Sending Signal Offer %v , myKey=%v, remoteKey=%v, signal=%v, t=%v, msg=%v", offerAnswer, myKey, remoteKey, s, t, msg)
+
 	if err != nil {
 		return err
 	}

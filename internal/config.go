@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/netbirdio/netbird/client/ssh"
+	mgmProto "github.com/netbirdio/netbird/management/proto"
 	"os"
 
 	"github.com/netbirdio/netbird/iface"
@@ -15,6 +16,11 @@ import (
 func init() {
 }
 
+type SignalService struct {
+	Uri      string `json:"uri"`
+	Protocol string `json:"protocol"`
+}
+
 // Config Configuration type
 type Config struct {
 	// Wireguard private key of local peer
@@ -24,24 +30,12 @@ type Config struct {
 	WgPort       int
 	WgIp         string
 	// SSHKey is a private SSH key in a PEM format
-	SSHKey string
-
-	// ExternalIP mappings, if different than the host interface IP
-	//
-	//   External IP must not be behind a CGNAT and port-forwarding for incoming UDP packets from WgPort on ExternalIP
-	//   to WgPort on host interface IP must be present. This can take form of single port-forwarding rule, 1:1 DNAT
-	//   mapping ExternalIP to host interface IP, or a NAT DMZ to host interface IP.
-	//
-	//   A single mapping will take the form of: external[/internal]
-	//    external (required): either the external IP address or "stun" to use STUN to determine the external IP address
-	//    internal (optional): either the internal/interface IP address or an interface name
-	//
-	//   examples:
-	//      "12.34.56.78"          => all interfaces IPs will be mapped to external IP of 12.34.56.78
-	//      "12.34.56.78/eth0"     => IPv4 assigned to interface eth0 will be mapped to external IP of 12.34.56.78
-	//      "12.34.56.78/10.1.2.3" => interface IP 10.1.2.3 will be mapped to external IP of 12.34.56.78
-
-	NATExternalIPs []string
+	SSHKey        string
+	Peers         []*mgmProto.RemotePeerConfig
+	PeerConfig    mgmProto.PeerConfig
+	Stuns         []*mgmProto.HostConfig
+	Turns         []*mgmProto.ProtectedHostConfig
+	SignalService SignalService
 }
 
 // createNewConfig creates a new config generating a new Wireguard key and saving to file
