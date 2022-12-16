@@ -2,11 +2,11 @@ package peer
 
 import (
 	"context"
-	ice "github.com/pion/ice/v2"
 	"net"
 	"strings"
 	"sync"
 	"time"
+	ice "ztnav2client/internal/ice"
 
 	"github.com/netbirdio/netbird/iface"
 	log "github.com/sirupsen/logrus"

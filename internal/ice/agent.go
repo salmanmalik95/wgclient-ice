@@ -189,7 +189,7 @@ func (a *Agent) run(ctx context.Context, t func(context.Context, *Agent)) error 
 }
 
 // taskLoop handles registered tasks and agent close.
-func (a *Agent) taskLaoop() {
+func (a *Agent) taskLoop() {
 	after := func() {
 		for {
 			// Get and run func registered by afterRun().

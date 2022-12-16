@@ -21,9 +21,9 @@ import (
 	signal "github.com/netbirdio/netbird/signal/client"
 	sProto "github.com/netbirdio/netbird/signal/proto"
 	"github.com/netbirdio/netbird/util"
-	"github.com/pion/ice/v2"
 	log "github.com/sirupsen/logrus"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
+	ice "ztnav2client/internal/ice"
 	"ztnav2client/internal/peer"
 	"ztnav2client/internal/proxy"
 )

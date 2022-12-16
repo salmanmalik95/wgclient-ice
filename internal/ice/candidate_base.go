@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"hash/crc32"
 	"io"
 	"net"
@@ -306,6 +307,11 @@ func (c *candidateBase) close() error {
 }
 
 func (c *candidateBase) writeTo(raw []byte, dst Candidate) (int, error) {
+
+	if strings.Contains(string(raw), "DEBUG") {
+		log.Debugf("Candidate Write Local candidate = %v to Remote Candidate=%v with dst addr = %s", c, dst, dst.addr())
+	}
+
 	n, err := c.conn.WriteTo(raw, dst.addr())
 	if err != nil {
 		c.agent().log.Infof("%s: %v", errSendPacket, err)

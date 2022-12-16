@@ -2,7 +2,9 @@ package ice
 
 import (
 	"context"
+	log "github.com/sirupsen/logrus"
 	"net"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -100,6 +102,12 @@ func (c *Conn) Write(p []byte) (int, error) {
 	}
 
 	atomic.AddUint64(&c.bytesSent, uint64(len(p)))
+
+	msg := string(p)
+
+	if strings.Contains(msg, "DEBUG") {
+		log.Debugf("Connection Write selected pair %v", pair)
+	}
 	return pair.Write(p)
 }
 

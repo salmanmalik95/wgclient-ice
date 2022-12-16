@@ -5,8 +5,10 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -52,6 +54,11 @@ func (f *fakePacketConn) SetDeadline(t time.Time) error      { return f.nextConn
 func (f *fakePacketConn) SetReadDeadline(t time.Time) error  { return f.nextConn.SetReadDeadline(t) }
 func (f *fakePacketConn) SetWriteDeadline(t time.Time) error { return f.nextConn.SetWriteDeadline(t) }
 func (f *fakePacketConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
+
+	if strings.Contains(string(p), "DEBUG") {
+		log.Debugf("Candidate Write for dst addr = %s to next conn=%v", addr, f.nextConn)
+	}
+
 	return f.nextConn.Write(p)
 }
 
