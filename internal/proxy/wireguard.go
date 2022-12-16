@@ -144,6 +144,7 @@ func (p *WireguardProxy) proxyToLocal() {
 				if err != nil {
 					continue
 				}
+				continue
 			}
 
 			_, err = p.localConn.Write(buf[:n])
