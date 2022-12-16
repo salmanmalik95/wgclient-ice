@@ -106,7 +106,7 @@ func (c *Conn) Write(p []byte) (int, error) {
 	msg := string(p)
 
 	if strings.Contains(msg, "DEBUG") {
-		log.Debugf("Connection Write selected pair %v", pair)
+		log.Debugf("Connection Write selected pair %v for msg=%s", pair, msg)
 	}
 	return pair.Write(p)
 }

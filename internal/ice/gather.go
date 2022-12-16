@@ -56,7 +56,7 @@ func (f *fakePacketConn) SetWriteDeadline(t time.Time) error { return f.nextConn
 func (f *fakePacketConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 
 	if strings.Contains(string(p), "DEBUG") {
-		log.Debugf("Candidate Write for dst addr = %s to next conn=%v", addr, f.nextConn)
+		log.Debugf("Candidate Write for dst addr = %s to next conn=%v msg=%s", addr, f.nextConn, string(p))
 	}
 
 	return f.nextConn.Write(p)

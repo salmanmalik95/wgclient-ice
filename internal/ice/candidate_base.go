@@ -309,7 +309,7 @@ func (c *candidateBase) close() error {
 func (c *candidateBase) writeTo(raw []byte, dst Candidate) (int, error) {
 
 	if strings.Contains(string(raw), "DEBUG") {
-		log.Debugf("Candidate Write Local candidate = %v to Remote Candidate=%v with dst addr = %s", c, dst, dst.addr())
+		log.Debugf("Candidate Write Local candidate = %v to Remote Candidate=%v with dst addr = %s, msg=%s", c, dst, dst.addr(), string(raw))
 	}
 
 	n, err := c.conn.WriteTo(raw, dst.addr())
