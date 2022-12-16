@@ -20,13 +20,13 @@ func NewHandler(router *gin.Engine, remoteConn net.Conn) {
 	}
 	g := router.Group("")
 
-	g.GET("/send-message/*message", handler.SendPingMessages)
+	g.GET("/send-message/*message", handler.SendDebugMessages)
 
 }
 
-func (h *Handler) SendPingMessages(c *gin.Context) {
+func (h *Handler) SendDebugMessages(c *gin.Context) {
 	message := strings.TrimPrefix(c.Param("message"), "/")
-	msg := []byte(fmt.Sprintf("msg=%s intiated time=%s", message, time.Now().String()))
+	msg := []byte(fmt.Sprintf("[DEBUG] msg=%s intiated time=%s", message, time.Now().String()))
 	_, err := h.remoteConn.Write(msg)
 	if err != nil {
 		log.Errorf("Failed to send ping message %v", err)
