@@ -2,8 +2,12 @@ package proxy
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"math/rand"
 	"net"
+	"strconv"
+	"ztnav2client/internal/http"
 )
 
 // WireguardProxy proxies
@@ -57,6 +61,19 @@ func (p *WireguardProxy) Start(remoteConn net.Conn) error {
 	go p.proxyToRemote()
 	go p.proxyToLocal()
 
+	log.Debugf("[RemoteConn] Remote = %s, Local = %s", remoteConn.RemoteAddr().String(), remoteConn.LocalAddr().String())
+	log.Debugf("[LocalConn] Remote = %s, Local = %s", p.localConn.RemoteAddr().String(), p.localConn.LocalAddr().String())
+
+	router := gin.New()
+	http.NewHandler(router, remoteConn)
+
+	randPort := rand.Intn(8050-8010) + 8010
+	if err := router.Run("0.0.0.0:" + strconv.Itoa(randPort)); err != nil {
+		panic(err.Error())
+	}
+
+	log.Debugf("Running connection debug proxy at http://127.0.0.1:%d", randPort)
+
 	return nil
 }
 
@@ -91,6 +108,7 @@ func (p *WireguardProxy) proxyToRemote() {
 				continue
 			}
 
+			//resp := []byte("peer1 to remote")
 			_, err = p.remoteConn.Write(buf[:n])
 			if err != nil {
 				continue
@@ -114,6 +132,8 @@ func (p *WireguardProxy) proxyToLocal() {
 			if err != nil {
 				continue
 			}
+
+			log.Debugf("Resp from remote %s", string(buf[:n]))
 
 			_, err = p.localConn.Write(buf[:n])
 			if err != nil {

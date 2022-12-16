@@ -145,6 +145,7 @@ func (conn *Conn) reCreateAgent() error {
 	defer conn.mu.Unlock()
 
 	failedTimeout := 6 * time.Second
+	//keepAlive := 10 * time.Second
 	var err error
 	agentConfig := &ice.AgentConfig{
 		MulticastDNSMode: ice.MulticastDNSModeDisabled,
@@ -156,6 +157,7 @@ func (conn *Conn) reCreateAgent() error {
 		UDPMux:           conn.config.UDPMux,
 		UDPMuxSrflx:      conn.config.UDPMuxSrflx,
 		NAT1To1IPs:       conn.config.NATExternalIPs,
+		//KeepaliveInterval: &keepAlive,
 	}
 
 	if conn.config.DisableIPv6Discovery {

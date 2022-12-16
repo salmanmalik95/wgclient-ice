@@ -198,7 +198,7 @@ func (e *Engine) Start() error {
 	myPrivateKey := e.config.WgPrivateKey
 	var err error
 
-	e.wgInterface, err = iface.NewWGIFace(wgIfaceName, wgAddr, iface.DefaultMTU)
+	e.wgInterface, err = iface.NewWGIFace(wgIfaceName, wgAddr, 1420)
 	if err != nil {
 		log.Errorf("failed creating wireguard interface instance %s: [%s]", wgIfaceName, err.Error())
 		return err

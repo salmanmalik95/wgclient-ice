@@ -7,7 +7,6 @@ import (
 
 	nbStatus "ztnav2client/status"
 
-	"github.com/netbirdio/netbird/iface"
 	signal "github.com/netbirdio/netbird/signal/client"
 	log "github.com/sirupsen/logrus"
 
@@ -55,13 +54,13 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 			cancel()
 		}()
 
-		localPeerState := nbStatus.LocalPeerState{
-			IP:              config.WgIp,
-			PubKey:          myPrivateKey.PublicKey().String(),
-			KernelInterface: iface.WireguardModuleIsLoaded(),
-		}
-
-		statusRecorder.UpdateLocalPeerState(localPeerState)
+		//localPeerState := nbStatus.LocalPeerState{
+		//	IP:              config.WgIp,
+		//	PubKey:          myPrivateKey.PublicKey().String(),
+		//	KernelInterface: iface.WireguardModuleIsLoaded(),
+		//}
+		//
+		//statusRecorder.UpdateLocalPeerState(localPeerState)
 
 		// with the global Wiretrustee config in hand connect (just a connection, no stream yet) Signal
 		signalClient, err := connectToSignal(engineCtx, config.SignalService.Protocol, config.SignalService.Uri, myPrivateKey)
@@ -83,6 +82,7 @@ func RunClient(ctx context.Context, config *Config, statusRecorder *nbStatus.Sta
 		}
 
 		engine := NewEngine(engineCtx, cancel, signalClient, engineConfig, statusRecorder)
+
 		err = engine.Start()
 		if err != nil {
 			log.Errorf("error while starting Netbird Connection Engine: %s", err)
