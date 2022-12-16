@@ -2,6 +2,7 @@ package ice
 
 import (
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"net"
 	"os"
@@ -228,6 +229,10 @@ func (m *UDPMuxDefault) Close() error {
 }
 
 func (m *UDPMuxDefault) writeTo(buf []byte, rAddr net.Addr) (n int, err error) {
+
+	if strings.Contains(string(buf), "DEBUG") {
+		log.Debugf("UDPMuxedConn writeTo rAddr=%s msg=%s udp conn=%v", rAddr, string(buf), m.params.UDPConn)
+	}
 	return m.params.UDPConn.WriteTo(buf, rAddr)
 }
 

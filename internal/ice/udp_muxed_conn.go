@@ -2,8 +2,10 @@ package ice
 
 import (
 	"encoding/binary"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -83,6 +85,9 @@ func (c *udpMuxedConn) WriteTo(buf []byte, rAddr net.Addr) (n int, err error) {
 		c.addAddress(addr)
 	}
 
+	if strings.Contains(string(buf), "DEBUG") {
+		log.Debugf("UDPMuxedConn WriteTo rAddr=%s msg=%s", rAddr, string(buf))
+	}
 	return c.params.Mux.writeTo(buf, rAddr)
 }
 
