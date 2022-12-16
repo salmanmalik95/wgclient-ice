@@ -2,11 +2,14 @@ package proxy
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"net"
 	"strconv"
+	"strings"
+	"time"
 	"ztnav2client/internal/http"
 )
 
@@ -133,7 +136,15 @@ func (p *WireguardProxy) proxyToLocal() {
 				continue
 			}
 
-			log.Debugf("Resp from remote %s", string(buf[:n]))
+			msg := string(buf[:n])
+			if strings.Contains(msg, "DEBUG") {
+				log.Debugf("Resp from remote %s", msg)
+				reply := fmt.Sprintf("[DEBUG] reply of message=[%s], time received=%s", msg, time.Now().String())
+				_, err = p.remoteConn.Write([]byte(reply))
+				if err != nil {
+					continue
+				}
+			}
 
 			_, err = p.localConn.Write(buf[:n])
 			if err != nil {
