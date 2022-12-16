@@ -137,12 +137,14 @@ func (p *WireguardProxy) proxyToLocal() {
 			}
 
 			msg := string(buf[:n])
-			if strings.Contains(msg, "DEBUG") && !strings.Contains(msg, "REPLY") {
+			if strings.Contains(msg, "DEBUG") {
 				log.Debugf("Resp from remote %s", msg)
-				reply := fmt.Sprintf("[DEBUG][REPLY] of message=[%s], time received=%s", msg, time.Now().String())
-				_, err = p.remoteConn.Write([]byte(reply))
-				if err != nil {
-					continue
+				if !strings.Contains(msg, "REPLY") {
+					reply := fmt.Sprintf("[DEBUG][REPLY] of message=[%s], time received=%s", msg, time.Now().String())
+					_, err = p.remoteConn.Write([]byte(reply))
+					if err != nil {
+						continue
+					}
 				}
 				continue
 			}
