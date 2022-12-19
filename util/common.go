@@ -23,7 +23,7 @@ func AddPingMessageHop(bytes []byte, currHop string) []byte {
 		currTime := time.Now().UTC().UnixMilli()
 		pingMsg.Message = fmt.Sprintf("%s \n [CLIENT] %s to %s = %d", pingMsg.Message, pingMsg.PrevHop, currHop, currTime-pingMsg.PrevTime)
 		pingMsg.PrevHop = currHop
-		pingMsg.PrevHop = currHop
+		pingMsg.PrevTime = currTime
 	}
 
 	resp, _ := json.Marshal(pingMsg)
