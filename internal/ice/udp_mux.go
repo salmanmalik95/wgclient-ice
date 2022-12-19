@@ -1,7 +1,6 @@
 package ice
 
 import (
-	"encoding/json"
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -9,8 +8,7 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
-	"ztnav2client/internal/http"
+	"ztnav2client/util"
 
 	"github.com/pion/logging"
 	"github.com/pion/stun"
@@ -235,15 +233,8 @@ func (m *UDPMuxDefault) writeTo(buf []byte, rAddr net.Addr) (n int, err error) {
 
 	if strings.Contains(string(buf), "DEBUG") {
 		log.Debugf("UDPMuxedConn writeTo rAddr=%s msg=%s udp conn=%v", rAddr, string(buf), &m.params.UDPConn)
-		var pingMsg http.PingMessage
-		_ = json.Unmarshal(buf, &pingMsg)
-		if !strings.Contains(string(buf), "REPLY") {
-			pingMsg.InitiatedTime = time.Now().UTC().UnixMilli()
-		} else {
-			pingMsg.ReplyInitiatedTime = time.Now().UTC().UnixMilli()
-		}
-		buf, _ = json.Marshal(pingMsg)
 
+		buf = util.AddPingMessageHop(buf, "UDP Mux Write")
 	}
 	return m.params.UDPConn.WriteTo(buf, rAddr)
 }

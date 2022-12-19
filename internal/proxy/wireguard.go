@@ -10,8 +10,8 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"time"
 	"ztnav2client/internal/http"
+	"ztnav2client/util"
 )
 
 // WireguardProxy proxies
@@ -134,32 +134,28 @@ func (p *WireguardProxy) proxyToLocal() {
 		default:
 			n, err := p.remoteConn.Read(buf)
 
-			tReached := time.Now().UTC().UnixMilli()
 			if err != nil {
 				continue
 			}
 
 			msg := string(buf[:n])
 			if strings.Contains(msg, "DEBUG") {
+				buff := util.AddPingMessageHop(buf[:n], "Message Received on Remote Conn")
 				log.Debugf("Resp from remote %s", msg)
-				var pingMsg http.PingMessage
-
-				_ = json.Unmarshal(buf[:n], &pingMsg)
-
 				if !strings.Contains(msg, "REPLY") {
-					pingMsg.Message = fmt.Sprintf("[REPLY] of message=[%s]", pingMsg.Message)
-					pingMsg.DestReachedTime = tReached
+					var pingMsg util.PingMessage
+					_ = json.Unmarshal(buff, &pingMsg)
+					pingMsg.Message = fmt.Sprintf("[REPLY]%s", pingMsg.Message)
 					reply, _ := json.Marshal(pingMsg)
 					_, err = p.remoteConn.Write(reply)
 					if err != nil {
 						continue
 					}
 				} else {
-					pingMsg.ReplyReachedTime = time.Now().UTC().UnixMilli()
+					buff := util.AddPingMessageHop(buf[:n], "Message Completed")
+					log.Debugf("Ping Message %s", string(buff))
 				}
 
-				b, _ := json.MarshalIndent(pingMsg, "", "  ")
-				log.Debugf("Ping Message %s", string(b))
 				continue
 			}
 

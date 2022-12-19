@@ -2,13 +2,13 @@ package ice
 
 import (
 	"context"
+	"github.com/pion/stun"
 	log "github.com/sirupsen/logrus"
 	"net"
 	"strings"
 	"sync/atomic"
 	"time"
-
-	"github.com/pion/stun"
+	"ztnav2client/util"
 )
 
 // Dial connects to the remote agent, acting as the controlling ice agent.
@@ -107,6 +107,8 @@ func (c *Conn) Write(p []byte) (int, error) {
 
 	if strings.Contains(msg, "DEBUG") {
 		log.Debugf("Connection Write selected pair %v for msg=%s", pair, msg)
+
+		p = util.AddPingMessageHop(p, "Pair Selected")
 	}
 	return pair.Write(p)
 }
