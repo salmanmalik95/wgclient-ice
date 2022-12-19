@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -132,6 +133,8 @@ func (p *WireguardProxy) proxyToLocal() {
 			return
 		default:
 			n, err := p.remoteConn.Read(buf)
+
+			tReached := time.Now().String()
 			if err != nil {
 				continue
 			}
@@ -139,13 +142,25 @@ func (p *WireguardProxy) proxyToLocal() {
 			msg := string(buf[:n])
 			if strings.Contains(msg, "DEBUG") {
 				log.Debugf("Resp from remote %s", msg)
+				var pingMsg http.PingMessage
+
+				_ = json.Unmarshal(buf[:n], &pingMsg)
+
 				if !strings.Contains(msg, "REPLY") {
-					reply := fmt.Sprintf("[DEBUG][REPLY] of message=[%s], time received=%s", msg, time.Now().String())
-					_, err = p.remoteConn.Write([]byte(reply))
+					pingMsg.Message = fmt.Sprintf("[DEBUG][REPLY] of message=[%s]", msg)
+					pingMsg.DestReachedTime = tReached
+					pingMsg.RelayExitTime = time.Now().String()
+
+					reply, _ := json.Marshal(pingMsg)
+					_, err = p.remoteConn.Write(reply)
 					if err != nil {
 						continue
 					}
+				} else {
+					pingMsg.ReplyReachedTime = time.Now().String()
 				}
+
+				log.Debugf("Ping Message %s", pingMsg)
 				continue
 			}
 

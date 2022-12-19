@@ -19,17 +19,17 @@
         "address": "100.64.0.1/32"
     },
     "Stuns": [{
-          "uri": "stun:netbird.extremecloudztna.com:3478",
+          "uri": "stun:turnserver1.extremecloudztna.com:3478",
           "protocol": 0
     }],
    "Turns": [{
-          "hostConfig": {"uri": "turn:netbird.extremecloudztna.com:3478", "protocol": 0},
-          "user": "self",
-          "password": "d9zRngJwvpQ1SFIjKRMIYYenLXAzilYjkj41aeDu33s"
+          "hostConfig": {"uri": "turn:turnserver1.extremecloudztna.com:3478", "protocol": 0},
+          "user": "salman",
+          "password": "123"
     }],
    "SignalService": {
-          "uri": "netbird.extremecloudztna.com:10000",
-          "protocol": "http"
+          "uri": "turnserver1.extremecloudztna.com:443",
+          "protocol": "https"
     }
 }
 

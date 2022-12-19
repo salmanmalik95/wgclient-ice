@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -19,14 +20,29 @@ func NewHandler(router *gin.Engine, remoteConn net.Conn) {
 		remoteConn: remoteConn,
 	}
 	g := router.Group("")
-
-	g.GET("/send-message/*message", handler.SendDebugMessages)
-
+	g.GET("/ping/*message", handler.SendPing)
 }
 
-func (h *Handler) SendDebugMessages(c *gin.Context) {
+type PingMessage struct {
+	Message               string `json:"message,omitempty"`
+	InitiatedTime         string `json:"initiated_time,omitempty"`
+	RelayReachedTime      string `json:"relay_reached_time,omitempty"`
+	RelayExitTime         string `json:"relay_exit_time,omitempty"`
+	DestReachedTime       string `json:"dest_reached_time,omitempty"`
+	ReplyInitiatedTime    string `json:"reply_initiated_time,omitempty"`
+	ReplyReachedRelayTime string `json:"reply_reached_relay_time,omitempty"`
+	ReplyExitRelayTime    string `json:"reply_exit_relay_time,omitempty"`
+	ReplyReachedTime      string `json:"reply_reached_time,omitempty"`
+}
+
+func (h *Handler) SendPing(c *gin.Context) {
+	var pingMsg PingMessage
+
 	message := strings.TrimPrefix(c.Param("message"), "/")
-	msg := []byte(fmt.Sprintf("[DEBUG] msg=%s intiated time=%s", message, time.Now().String()))
+	pingMsg.Message = fmt.Sprintf("[DEBUG] msg=%s", message)
+	pingMsg.InitiatedTime = time.Now().String()
+
+	msg, _ := json.Marshal(pingMsg)
 	_, err := h.remoteConn.Write(msg)
 	if err != nil {
 		log.Errorf("Failed to send ping message %v", err)
@@ -34,5 +50,4 @@ func (h *Handler) SendDebugMessages(c *gin.Context) {
 	}
 
 	c.JSON(200, map[string]string{"resp": "message sent successfully"})
-
 }
