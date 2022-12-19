@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"ztnav2client/util"
 
 	"github.com/pion/logging"
 	"github.com/pion/transport/packetio"
@@ -86,6 +87,7 @@ func (c *udpMuxedConn) WriteTo(buf []byte, rAddr net.Addr) (n int, err error) {
 	}
 
 	if strings.Contains(string(buf), "DEBUG") {
+		buf = util.AddPingMessageHop(buf, "UDP Mux Write To")
 		log.Debugf("UDPMuxedConn WriteTo rAddr=%s msg=%s", rAddr, string(buf))
 	}
 	return c.params.Mux.writeTo(buf, rAddr)
