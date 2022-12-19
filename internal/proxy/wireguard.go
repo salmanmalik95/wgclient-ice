@@ -147,7 +147,7 @@ func (p *WireguardProxy) proxyToLocal() {
 				_ = json.Unmarshal(buf[:n], &pingMsg)
 
 				if !strings.Contains(msg, "REPLY") {
-					pingMsg.Message = fmt.Sprintf("[DEBUG][REPLY] of message=[%s]", msg)
+					pingMsg.Message = fmt.Sprintf("[REPLY] of message=[%s]", pingMsg.Message)
 					pingMsg.DestReachedTime = tReached
 					pingMsg.RelayExitTime = time.Now().String()
 
