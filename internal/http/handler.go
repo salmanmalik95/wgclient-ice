@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net"
 	"strings"
-	"time"
 )
 
 type Handler struct {
@@ -40,7 +39,6 @@ func (h *Handler) SendPing(c *gin.Context) {
 
 	message := strings.TrimPrefix(c.Param("message"), "/")
 	pingMsg.Message = fmt.Sprintf("[DEBUG] msg=%s", message)
-	pingMsg.InitiatedTime = time.Now().UTC().UnixMilli()
 
 	msg, _ := json.Marshal(pingMsg)
 	_, err := h.remoteConn.Write(msg)

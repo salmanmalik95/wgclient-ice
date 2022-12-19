@@ -2,6 +2,7 @@ package ice
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+	"ztnav2client/internal/http"
 
 	"github.com/pion/stun"
 )
@@ -310,6 +312,14 @@ func (c *candidateBase) writeTo(raw []byte, dst Candidate) (int, error) {
 
 	if strings.Contains(string(raw), "DEBUG") {
 		log.Debugf("Candidate Write Local candidate = %v to Remote Candidate=%v with dst addr = %s, msg=%s", c, dst, dst.addr(), string(raw))
+		var pingMsg http.PingMessage
+		_ = json.Unmarshal(raw, &pingMsg)
+		if !strings.Contains(string(raw), "REPLY") {
+			pingMsg.InitiatedTime = time.Now().UTC().UnixMilli()
+		} else {
+			pingMsg.ReplyInitiatedTime = time.Now().UTC().UnixMilli()
+		}
+		raw, _ = json.Marshal(pingMsg)
 	}
 
 	n, err := c.conn.WriteTo(raw, dst.addr())
