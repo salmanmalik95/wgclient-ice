@@ -40,7 +40,7 @@ func (h *Handler) SendPing(c *gin.Context) {
 
 	message := strings.TrimPrefix(c.Param("message"), "/")
 	pingMsg.Message = fmt.Sprintf("[DEBUG] msg=%s", message)
-	pingMsg.InitiatedTime = time.Now().String()
+	pingMsg.InitiatedTime = time.Now().UTC().String()
 
 	msg, _ := json.Marshal(pingMsg)
 	_, err := h.remoteConn.Write(msg)
