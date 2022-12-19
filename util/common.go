@@ -21,7 +21,9 @@ func AddPingMessageHop(bytes []byte, currHop string) []byte {
 		pingMsg.PrevTime = time.Now().UTC().UnixMilli()
 	} else {
 		currTime := time.Now().UTC().UnixMilli()
-		pingMsg.Message = fmt.Sprintf("%s \n %s => %s = %d", pingMsg.Message, pingMsg.PrevHop, currHop, currTime-pingMsg.PrevTime)
+		pingMsg.Message = fmt.Sprintf("%s \n %s to %s = %d", pingMsg.Message, pingMsg.PrevHop, currHop, currTime-pingMsg.PrevTime)
+		pingMsg.PrevHop = currHop
+		pingMsg.PrevHop = currHop
 	}
 
 	resp, _ := json.Marshal(pingMsg)

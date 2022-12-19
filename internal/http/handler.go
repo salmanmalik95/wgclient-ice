@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -25,8 +26,12 @@ func NewHandler(router *gin.Engine, remoteConn net.Conn) {
 func (h *Handler) SendPing(c *gin.Context) {
 	message := strings.TrimPrefix(c.Param("message"), "/")
 	message = fmt.Sprintf("[DEBUG] msg=%s", message)
+	var pingMsg util.PingMessage
+	pingMsg.Message = message
 
-	msg := util.AddPingMessageHop([]byte(message), "Ping Initiated")
+	b, _ := json.Marshal(pingMsg)
+
+	msg := util.AddPingMessageHop(b, "Ping Initiated")
 
 	_, err := h.remoteConn.Write(msg)
 	if err != nil {
