@@ -25,14 +25,14 @@ func NewHandler(router *gin.Engine, remoteConn net.Conn) {
 
 type PingMessage struct {
 	Message               string `json:"message,omitempty"`
-	InitiatedTime         string `json:"initiated_time,omitempty"`
-	RelayReachedTime      string `json:"relay_reached_time,omitempty"`
-	RelayExitTime         string `json:"relay_exit_time,omitempty"`
-	DestReachedTime       string `json:"dest_reached_time,omitempty"`
-	ReplyInitiatedTime    string `json:"reply_initiated_time,omitempty"`
-	ReplyReachedRelayTime string `json:"reply_reached_relay_time,omitempty"`
-	ReplyExitRelayTime    string `json:"reply_exit_relay_time,omitempty"`
-	ReplyReachedTime      string `json:"reply_reached_time,omitempty"`
+	InitiatedTime         int64  `json:"initiated_time,omitempty"`
+	RelayReachedTime      int64  `json:"relay_reached_time,omitempty"`
+	RelayExitTime         int64  `json:"relay_exit_time,omitempty"`
+	DestReachedTime       int64  `json:"dest_reached_time,omitempty"`
+	ReplyInitiatedTime    int64  `json:"reply_initiated_time,omitempty"`
+	ReplyReachedRelayTime int64  `json:"reply_reached_relay_time,omitempty"`
+	ReplyExitRelayTime    int64  `json:"reply_exit_relay_time,omitempty"`
+	ReplyReachedTime      int64  `json:"reply_reached_time,omitempty"`
 }
 
 func (h *Handler) SendPing(c *gin.Context) {
@@ -40,7 +40,7 @@ func (h *Handler) SendPing(c *gin.Context) {
 
 	message := strings.TrimPrefix(c.Param("message"), "/")
 	pingMsg.Message = fmt.Sprintf("[DEBUG] msg=%s", message)
-	pingMsg.InitiatedTime = time.Now().UTC().String()
+	pingMsg.InitiatedTime = time.Now().UTC().Unix()
 
 	msg, _ := json.Marshal(pingMsg)
 	_, err := h.remoteConn.Write(msg)
