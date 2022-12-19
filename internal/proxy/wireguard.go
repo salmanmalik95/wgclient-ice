@@ -140,11 +140,11 @@ func (p *WireguardProxy) proxyToLocal() {
 
 			msg := string(buf[:n])
 			if strings.Contains(msg, "DEBUG") {
-				buff := util.AddPingMessageHop(buf[:n], "Message Received on Remote Conn")
+				data := util.AddPingMessageHop(buf[:n], "Message Received on Remote Conn")
 				log.Debugf("Resp from remote %s", msg)
 				if !strings.Contains(msg, "REPLY") {
 					var pingMsg util.PingMessage
-					_ = json.Unmarshal(buff, &pingMsg)
+					_ = json.Unmarshal(data, &pingMsg)
 					pingMsg.Message = fmt.Sprintf("[REPLY]%s", pingMsg.Message)
 					reply, _ := json.Marshal(pingMsg)
 					_, err = p.remoteConn.Write(reply)
@@ -152,8 +152,8 @@ func (p *WireguardProxy) proxyToLocal() {
 						continue
 					}
 				} else {
-					buff := util.AddPingMessageHop(buf[:n], "Message Completed")
-					log.Debugf("Ping Message %s", string(buff))
+					data = util.AddPingMessageHop(data, "Message Completed")
+					log.Debugf("Ping Message %s", string(data))
 				}
 
 				continue
